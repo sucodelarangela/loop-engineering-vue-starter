@@ -1,0 +1,38 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm lint:*)",
+      "Bash(pnpm typecheck:*)",
+      "Bash(pnpm test:*)",
+      "Bash(pnpm vitest:*)",
+      "Bash(pnpm vue-tsc:*)",
+      "Bash(git status)",
+      "Bash(git diff:*)"
+    ],
+    "deny": [
+      "Edit(src/stores/cart.ts)",
+      "Edit(src/types/product.ts)",
+      "Read(.env)",
+      "Bash(git push:*)",
+      "Bash(rm -rf:*)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [{ "type": "command", "command": "pnpm lint --fix" }]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "pnpm vitest run > /dev/null 2>&1 || { echo 'Testes falhando. Corrija antes de encerrar.' >&2; exit 2; }"
+          }
+        ]
+      }
+    ]
+  }
+}

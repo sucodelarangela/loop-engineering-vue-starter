@@ -1,0 +1,32 @@
+name: claude-loop
+on:
+  issues:
+    types: [labeled]
+
+jobs:
+  claude:
+    if: github.event.label.name == 'ready-for-claude'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: npm install -g @anthropic-ai/claude-code
+      - run: |
+          git config user.name "claude-loop"
+          git config user.email "claude-loop@users.noreply.github.com"
+      - run: bash scripts/loop.sh
+        env:
+          REPO: ${{ github.repository }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          # PRs abertos com GITHUB_TOKEN não disparam outros workflows.
+          # Para o CI rodar nos PRs do loop, use um GitHub App ou token de escopo fino.
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
